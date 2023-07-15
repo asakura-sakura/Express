@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <!-- 入力フォームを追加 -->
+    <label for="name">Name:</label><br />
+    <input type="text" id="name" name="name" /><br />
+    <label for="age">Age:</label><br />
+    <input type="text" id="age" name="age" /><br />
+    <button onclick="createUser()">Create User</button>
+
+    <div id="userList"></div>
+    <!-- ユーザー一覧を表示するための要素を追加 -->
+
+    <script>
+      async function createUser() {
+        const name = document.getElementById("name").value;
+        const age = document.getElementById("age").value;
+
+        const response = await fetch("http://localhost:3000/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: name, age: age }),
+        });
+
+        if (!response.ok) {
+          const message = await response.text();
+          throw new Error(`An error has occurred: ${message}`);
+        }
+
+        const user = await response.json();
+
+        console.log(user);
+        fetchUserList(); // ユーザー一覧を更新するために追加
+      }
+
+      async function fetchUserList() {
+        const response = await fetch("http://localhost:3000/users");
+        const userList = await response.json();
+
+        const userListElement = document.getElementById("userList");
+        userListElement.innerHTML = ""; // ユーザーリストをクリア
+
+        for (const user of userList) {
+          const userElement = document.createElement("p");
+          userElement.textContent = `Name: ${user.name}, Age: ${user.age}`;
+          userListElement.appendChild(userElement);
+        }
+      }
+
+      fetchUserList(); // 初回のユーザーリスト取得を追加
+    </script>
+  </body>
+</html>
